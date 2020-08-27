@@ -1,6 +1,7 @@
 import os
+from abc import ABC, abstractmethod
+
 import dropbox
-from abc import ABC, abstractmethod, abstractproperty
 from config import BASE_DIR
 
 
@@ -10,11 +11,11 @@ class WrongLinkValueError(Exception):
 
 class BaseSaver(ABC):
     @abstractmethod
-    def upload(self):
+    def upload(self, filename, data):
         pass
 
     @abstractmethod
-    def download(self):
+    def download(self, link):
         pass
 
 
@@ -26,13 +27,13 @@ class DropboxSaver(BaseSaver):
         path_to_file = f'/{filename}'
         try:
             meta_data = self.worker.files_alpha_upload(data, path_to_file)
-        except:
-            return 
+        except Exception:
+            return {'status': 'error'}
         return meta_data
 
     def download(self, link):
         try:
-            meta, response = self.worker.files_download(link)
+            _, response = self.worker.files_download(link)
         except dropbox.stone_validators.ValidationError:
             raise WrongLinkValueError
         if response.status_code == 200:
@@ -58,10 +59,10 @@ class LocalSaver(BaseSaver):
         if not os.path.exists(self.upload_dir):
             print('make dir')
             os.mkdir(self.upload_dir)
-            
+
         with open(os.path.join(self.upload_dir, filename), 'wb') as f:
             f.write(data)
-        res['path_display'] = '/' + filename 
+        res['path_display'] = '/' + filename
         return res
 
     def download(self, link):
@@ -72,7 +73,7 @@ class LocalSaver(BaseSaver):
 
 if __name__ == "__main__":
     saver = LocalSaver()
-    data = open('/home/doc/1.pdf', 'rb').read()
-    from app import uniq_name 
-    filename = uniq_name('1.pdf')
-    link = '/1d95d2b2-d8ea-40ba-9604-83cc29a9ec67_1.pdf'
+    test_data = open('/home/doc/1.pdf', 'rb').read()
+    from app import uniq_name
+    test_filename = uniq_name('1.pdf')
+    test_link = '/1d95d2b2-d8ea-40ba-9604-83cc29a9ec67_1.pdf'

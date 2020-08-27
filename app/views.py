@@ -1,17 +1,19 @@
-import sys
-import os
 import json
-import bson
-import jwt
 from datetime import datetime, timedelta
 
-from flask import Flask, jsonify, request, abort, make_response
+import jwt
+from flask import jsonify, request, abort, make_response
 from mongoengine import NotUniqueError
 
-from app import app, db, obj_saver
-from utils import set_meta, uniq_name, base64_encoding, uuid4, token_requered
+from app import app, obj_saver
+from utils import set_meta, uniq_name, base64_encoding, token_requered
 from models import User, FilesStorage
 from saver_class import WrongLinkValueError
+
+
+@app.errorhandler(405)
+def not_allowed(error):
+    return make_response(jsonify({'error': 'Method not allowed'}), 405)
 
 
 @app.errorhandler(404)
@@ -42,7 +44,7 @@ def save_user():
 @app.route('/api/auth/token/', methods=['POST'])
 def get_token():
     if not request.headers:
-       abort(400) 
+        abort(400)
     username = request.headers.get('username')
     password = request.headers.get('password')
     user = User.objects.get(username=username)
@@ -51,9 +53,9 @@ def get_token():
         abort(400)
     if user.check_password(password):
         payload = {
-                'username': username,
-                'password': password,
-                'exp': datetime.now() + timedelta(minutes=30)
+            'username': username,
+            'password': password,
+            'exp': datetime.now() + timedelta(minutes=30)
                 }
         token = jwt.encode(payload, app.config['SECRET_KEY'])
     else:
@@ -93,7 +95,7 @@ def get_value(currnet_user):
         data_raw = obj_saver.download(link_to_dowload)
     except WrongLinkValueError:
         abort(400)
-    return jsonify({'status': 'ok',# [value],
+    return jsonify({'status': 'ok',
                     'base64_data': base64_encoding(data_raw)})
 
 
@@ -111,9 +113,9 @@ def put_value(current_user):
             meta_dict = set_meta(meta)
             path_to_load = meta_dict['path_display']
             file = FilesStorage(
-                    path_to_load=path_to_load,
-                    author=current_user,
-                    meta_data=meta_dict)
+                path_to_load=path_to_load,
+                author=current_user,
+                meta_data=meta_dict)
             try:
                 file.save()
             except:
@@ -123,7 +125,6 @@ def put_value(current_user):
         stream.close()
         return jsonify({'status': 'OK', 'key': file.key}), 201
 
-    else:
-        print('not files')
-        error = 'Not loading files'
-        return jsonify({'status': 'Error', 'error': error})
+    print('not files')
+    error = 'Not loading files'
+    return jsonify({'status': 'Error', 'error': error})

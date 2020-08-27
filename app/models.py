@@ -1,7 +1,7 @@
 import datetime
-from mongoengine.errors import NotUniqueError
-from werkzeug.security import check_password_hash, generate_password_hash
 from uuid import uuid4
+from werkzeug.security import check_password_hash, generate_password_hash
+from mongoengine.errors import NotUniqueError
 from mongoengine import (
         Document, StringField, ReferenceField, DateTimeField, DictField
         )
@@ -11,7 +11,6 @@ class User(Document):
     username = StringField(max_length=20, required=True, unique=True)
     password = StringField(max_length=200, required=True)
 
-    
     def __repr__(self):
         return f'<User: {self.username}>'
 
@@ -34,7 +33,7 @@ class FilesStorage(Document):
     created = DateTimeField(default=datetime.datetime.now(), required=True)
     path_to_load = StringField(required=True)
     meta_data = DictField()
-    author = ReferenceField(User) 
+    author = ReferenceField(User)
 
     def generate_key(self):
         self.key = str(uuid4())

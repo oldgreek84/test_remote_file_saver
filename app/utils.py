@@ -1,9 +1,10 @@
-import os
-import jwt
 from functools import wraps
 from uuid import uuid4
-from base64 import b64encode, b64decode
+from base64 import b64encode
+
+import jwt
 from flask import request, jsonify
+
 from app import app
 from models import User
 
@@ -20,17 +21,17 @@ def token_requered(f):
                 return f(current_user, *args, **kwargs)
             except jwt.exceptions.ExpiredSignatureError:
                 message = {
-                        'status': 'Error',
-                        'message': 'Token has expired'}
+                    'status': 'Error',
+                    'message': 'Token has expired'}
             except jwt.exceptions.DecodeError:
                 message = {
-                        'status': 'Error',
-                        'message': 'Invalid token'}
+                    'status': 'Error',
+                    'message': 'Invalid token'}
         else:
             message = {
-                    'status': 'Error',
-                    'message': 'Token is required'}
-        return jsonify(message), 401 
+                'status': 'Error',
+                'message': 'Token is required'}
+        return jsonify(message), 401
     return wrapper
 
 
@@ -54,7 +55,6 @@ def base64_encoding(raw_data):
 def save_file(filename, data, size=1024):
     with open(filename, 'wb') as f:
         while True:
-            
             data = data[:size]
             if not data: break
             print(len(data))
@@ -82,8 +82,8 @@ def main_saver(from_file, to_file, buffer_size=1024):
     with open(to_file, 'wb') as f:
         while True:
             try:
-                d = next(gen)
-                f.write(d)
+                data_part = next(gen)
+                f.write(data_part)
                 print('writing...')
             except StopIteration:
                 print('not data')
