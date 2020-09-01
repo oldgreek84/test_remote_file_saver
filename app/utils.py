@@ -1,6 +1,7 @@
 from functools import wraps
 from uuid import uuid4
 from base64 import b64encode
+import traceback
 
 import jwt
 from flask import request, jsonify
@@ -9,8 +10,40 @@ from app import app
 from models import User
 
 
-def token_requered(f):
-    @wraps(f)
+def json_response(message, code=200):
+    ''' create json object response '''
+
+    return jsonify(message), code
+
+
+def error_response(exception):
+    ''' create response for all exceptions in json view '''
+
+    res = {
+        'status': 'error',
+        'message': str(exception),
+        'traceback_info': traceback.print_exc()}
+    return json_response(res, 400)
+
+
+def exception_catcher(func_to_decor):
+    ''' decorator cathed all exceptions on base level views '''
+
+    @wraps(func_to_decor)
+    def wrapper(*args, **kwargs):
+        try:
+            return func_to_decor(*args, **kwargs)
+        except Exception as e:
+            return error_response(e)
+    return wrapper
+
+
+def token_requered(func_to_decor):
+    '''
+    decorator checking user data with token and return current user
+    '''
+
+    @wraps(func_to_decor)
     def wrapper(*args, **kwargs):
         token = request.headers.get('x-access-token')
         if token:
@@ -18,7 +51,7 @@ def token_requered(f):
                 data = jwt.decode(token, app.config['SECRET_KEY'])
                 user = User.objects.get(username=data['username'])
                 current_user = user
-                return f(current_user, *args, **kwargs)
+                return func_to_decor(current_user, *args, **kwargs)
             except jwt.exceptions.ExpiredSignatureError:
                 message = {
                     'status': 'Error',
@@ -35,56 +68,18 @@ def token_requered(f):
     return wrapper
 
 
-def set_meta(meta):
-    res = {}
-    l = [p for p in dir(meta) if not p.startswith('_')]
-    for par in l:
-        res[par] = getattr(meta, par)
-    return res
+def set_uniq_name(filename):
+    ''' func create unique name of filename and returned it '''
 
-
-def uniq_name(filename):
     return f'{str(uuid4())}_{filename}'
 
 
-def base64_encoding(raw_data):
+def encode_to_base64(raw_data):
+    '''
+    func coding bytes data to base64 string
+    :raw_data: bytes data of file
+    return -> decoded string in base64 coding
+    '''
+
     base64_bytes = b64encode(raw_data)
     return base64_bytes.decode(app.config['ENCODING'])
-
-
-def save_file(filename, data, size=1024):
-    with open(filename, 'wb') as f:
-        while True:
-            data = data[:size]
-            if not data: break
-            print(len(data))
-            f.write(data)
-
-
-def reader(file, size=1024):
-    with open(file, 'rb') as data:
-        while True:
-
-            line = data.read(size)
-            if not line: break
-            yield line
-            print(len(line))
-
-
-def saver(data, file_name):
-    with open(file_name, 'ab') as f:
-        f.write(data)
-        print(len(data))
-
-
-def main_saver(from_file, to_file, buffer_size=1024):
-    gen = reader(from_file, buffer_size)
-    with open(to_file, 'wb') as f:
-        while True:
-            try:
-                data_part = next(gen)
-                f.write(data_part)
-                print('writing...')
-            except StopIteration:
-                print('not data')
-                break
