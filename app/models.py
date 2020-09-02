@@ -10,13 +10,13 @@ from mongoengine import (
 
 class NotUniqueUserName(Exception):
     '''
-    exception raised if new user name is already exists
+    exception raises if new user name is already exists
     '''
 
 
 class User(Document):
     '''
-    class create User model entry in MongoDb.
+    class creates User model entry in MongoDb.
     Has entry username its name of the user,
     and entry password hash of new user
     '''
@@ -29,20 +29,20 @@ class User(Document):
 
     def generate_password(self):
         '''
-        method create user password hash
+        method creates user password hash
         '''
 
         self.password = generate_password_hash(self.password)
 
     def check_password(self, password):
         '''
-        method return bool for cheking user password
+        method returns bool for cheking user password
         '''
         return check_password_hash(self.password, password)
 
     def save(self):
         '''
-        method generate password before saved user model entry
+        method generates password before saved user model entry
         '''
 
         try:
@@ -54,9 +54,9 @@ class User(Document):
 
 class FilesStorage(Document):
     '''
-    class create file storage model for entrt in MongoDb.
-    Model saved unique key of uploaded files, loasded date, path for upload
-    the file and realation entry author to the user
+    class creates file storage model for entrt in MongoDb.
+    Model saves unique key of uploaded files, loasded date,
+    path for upload the file and realation entry author to the user
     '''
 
     uniq_file_key = StringField(required=True)
@@ -66,16 +66,12 @@ class FilesStorage(Document):
     author = ReferenceField(User)
 
     def generate_key(self):
-        '''
-        method create unique key for file entry
-        '''
+        ''' method creates a unique key for file entry '''
 
         self.uniq_file_key = str(uuid4())
 
     def save(self):
-        '''
-        method generate key before saved file model entry
-        '''
+        ''' method generates key before saved file model entry '''
 
         try:
             self.generate_key()

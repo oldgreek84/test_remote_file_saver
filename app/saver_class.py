@@ -8,7 +8,7 @@ from config import BASE_DIR
 
 def get_meta_data_attributes(meta_data):
     '''
-    function get object and return dict with attributes of objects
+    function recieves a object and returns dict with attributes of object
     '''
 
     res = {}
@@ -26,14 +26,14 @@ class WrongLinkValueError(Exception):
 
 class BaseSaver(ABC):
     '''
-    class realise interface for upload and download file
+    class realise interface for uploads and downloads file
     with some remote service
     '''
 
     @abstractmethod
     def upload(self, filename, data):
         '''
-        method upload the file to remote server
+        method uploads the file to remote server
         :filename: name for saved file
         :data: bytes of file
         return -> string path to download file and dict of file meta data
@@ -42,7 +42,7 @@ class BaseSaver(ABC):
     @abstractmethod
     def download(self, link):
         '''
-        method download the file from remote server
+        method downloads the file from remote server
         :link: link for uplaod file
         retun -> bytes data of file
         '''
@@ -50,7 +50,7 @@ class BaseSaver(ABC):
 
 class DropboxSaver(BaseSaver):
     '''
-    class uplaod and download the file with dropbox server
+    class uplaods and downloads the file with dropbox server
     '''
 
     def __init__(self, worker):
@@ -58,8 +58,8 @@ class DropboxSaver(BaseSaver):
 
     def upload(self, filename, data):
         '''
-        uploading file to remote dropbox server
-        return special link to file and file meta data
+        uploads file to remote dropbox server
+        returns special link to file and file meta data
         '''
         path_to_file = f'/{filename}'
         try:
@@ -74,8 +74,8 @@ class DropboxSaver(BaseSaver):
 
     def download(self, link):
         '''
-        download file data from remote server with special link
-        returned bytes
+        downloads file data from remote server with special link
+        and returns bytes
         '''
 
         try:
@@ -90,9 +90,7 @@ class DropboxSaver(BaseSaver):
 
 
 class LocalSaver(BaseSaver):
-    '''
-    class realise upload and download the file on local server
-    '''
+    ''' uploads and downloads the file on local server '''
 
     upload_dir = BASE_DIR + '/uploads'
 
@@ -101,7 +99,7 @@ class LocalSaver(BaseSaver):
 
     def upload(self, filename, data):
         '''
-        upload file to local dir
+        uploads file to local dir
         :filename: string file name
         :data: bytes of file
         return -> dict with entry 'path_display' special link to file
@@ -118,7 +116,7 @@ class LocalSaver(BaseSaver):
 
     def download(self, link):
         '''
-        download file from local server with special link
+        downloads file from local server with special link
         :link: string link to dowload file
         return -> bytes file data
         '''

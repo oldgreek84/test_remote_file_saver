@@ -11,13 +11,13 @@ from models import User
 
 
 def json_response(message, code=200):
-    ''' create json object response '''
+    ''' creates a json object response '''
 
     return jsonify(message), code
 
 
 def error_response(exception):
-    ''' create response for all exceptions in json view '''
+    ''' createa response for all exceptions in app json view '''
 
     res = {
         'status': 'error',
@@ -27,7 +27,7 @@ def error_response(exception):
 
 
 def exception_catcher(func_to_decor):
-    ''' decorator cathed all exceptions on base level views '''
+    ''' decorator cathes all exceptions on base level views '''
 
     @wraps(func_to_decor)
     def wrapper(*args, **kwargs):
@@ -40,7 +40,7 @@ def exception_catcher(func_to_decor):
 
 def token_requered(func_to_decor):
     '''
-    decorator checking user data with token and return current user
+    decorator checks a user data token and returns the current user
     '''
 
     @wraps(func_to_decor)
@@ -69,14 +69,14 @@ def token_requered(func_to_decor):
 
 
 def set_uniq_name(filename):
-    ''' func create unique name of filename and returned it '''
+    ''' creates a unique name of filename and returns it '''
 
     return f'{str(uuid4())}_{filename}'
 
 
 def encode_to_base64(raw_data):
     '''
-    func coding bytes data to base64 string
+    encodes a bytes data to base64 string
     :raw_data: bytes data of file
     return -> decoded string in base64 coding
     '''

@@ -25,7 +25,7 @@ def bad_request(error):
 @app.route('/api/auth/users/', methods=['GET'])
 @exception_catcher
 def save_new_user():
-    ''' create new user with rest api request '''
+    ''' creates new user with rest api request '''
 
     if not request.headers:
         abort(400)
@@ -37,7 +37,7 @@ def save_new_user():
 
 @app.route('/api/auth/token/', methods=['GET'])
 def get_token():
-    ''' create string auth token and return it to current user '''
+    ''' creates string auth token for the current user '''
 
     if not request.headers:
         abort(400)
@@ -50,7 +50,8 @@ def get_token():
             'Token': token.decode(app.config['ENCODING'])}
         status_code = 200
     else:
-        message = {'status': 'error', 'message': 'invalid user data'}
+        message = {'status': 'error',
+                   'message': 'invalid username or password'}
         status_code = 400
     return jsonify(message), status_code
 
@@ -59,8 +60,8 @@ def get_token():
 @token_requered
 def get_file_data(currnet_user):
     '''
-    func get unique file database key and
-    return encoded to base64 file data string
+    retrieves a unique file key and returns
+    the encoded to base64 file data string from the database
     '''
 
     if not request.json:
@@ -78,8 +79,8 @@ def get_file_data(currnet_user):
 @token_requered
 def send_file_data(current_user):
     '''
-    send opened file data for current user to save it in
-    database and return unique key
+    retrieves the file object from the request and saves it in server
+    and db. Returns a unique file key
     '''
 
     if not request.files:
