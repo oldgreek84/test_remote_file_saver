@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 import jwt
 
-from mongoengine.errors import DoesNotExist
+from mongoengine.errors import DoesNotExist, FieldDoesNotExist
 
 from app import app, obj_saver
 from utils import set_uniq_name, encode_to_base64
@@ -15,8 +15,8 @@ def create_new_user(username, password):
     try:
         User(username=username, password=password).save()
     except NotUniqueUserName:
-        return {'status': 'Error', 'message': 'Not unique user name'}
-    return {'status': 'Ok', 'message': 'User saved success'}
+        return {'status': 'Error', 'message': 'Not unique user name'}, 400
+    return {'status': 'Ok', 'message': 'User saved success'}, 201
 
 
 def get_user_token(username, password):
@@ -56,6 +56,10 @@ def download_file_from_service(uniq_file_key):
         data_raw = obj_saver.download(get_download_file_link(uniq_file_key))
     except WrongLinkValueError:
         return None, 'wrong link to file'
+    except DoesNotExist:
+        return None, 'wrong key'
+    except FieldDoesNotExist:
+        return None, 'needs name "key"'
     return encode_to_base64(data_raw), None
 
 

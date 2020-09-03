@@ -1,4 +1,4 @@
-from flask import jsonify, request, abort, make_response
+from flask import jsonify, request, make_response
 
 from app import app
 from utils import token_requered, exception_catcher
@@ -23,26 +23,32 @@ def bad_request(error):
 
 
 @app.route('/api/auth/users/', methods=['GET'])
-@exception_catcher
+# @exception_catcher
 def save_new_user():
     ''' creates new user with rest api request '''
 
-    if not request.headers:
-        abort(400)
     username = request.headers.get('username')
     password = request.headers.get('password')
-    user_creation_message = create_new_user(username, password)
-    return jsonify(user_creation_message)
+    if not username or not password:
+        return jsonify({
+            'status': 'error',
+            'message': 'username and password required'}), 400
+
+    user_creation_message, status_code = create_new_user(username, password)
+    return jsonify(user_creation_message), status_code
 
 
 @app.route('/api/auth/token/', methods=['GET'])
 def get_token():
     ''' creates string auth token for the current user '''
 
-    if not request.headers:
-        abort(400)
     username = request.headers.get('username')
     password = request.headers.get('password')
+    if not username or not password:
+        return jsonify({
+            'status': 'error',
+            'message': 'username and password required'}), 400
+
     token = get_user_token(username, password)
     if token:
         message = {
@@ -64,11 +70,13 @@ def get_file_data(currnet_user):
     the encoded to base64 file data string from the database
     '''
 
-    if not request.json:
+    try:
+        uniq_file_key = request.json['key']
+    except (TypeError, KeyError):
         return jsonify({
             'status': 'error',
-            'message': 'not sended unqiue key'}), 400
-    uniq_file_key = request.json.get('key')
+            'message': 'required json name data key'}), 400
+
     base64_file_data, error = download_file_from_service(uniq_file_key)
     if error:
         return jsonify({'status': 'error', 'message': error}), 400
@@ -83,10 +91,10 @@ def send_file_data(current_user):
     and db. Returns a unique file key
     '''
 
-    if not request.files:
-        return jsonify({'status': 'Error', 'error': 'not files sended'}), 400
-
     file_data_object = request.files.get('file')
+    if not file_data_object:
+        return jsonify({'status': 'Error', 'error': 'file not sended'}), 400
+
     uniq_file_key, error = save_file_data(current_user,
                                           file_data_object)
     if error:

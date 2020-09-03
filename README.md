@@ -61,3 +61,9 @@ main_url = http://localhost:5000
 - download or upload user files
 
   {main__url}/api/values/
+
+#### API documentation
+
+Documentation created with postman:
+
+[Link to documentation](https://explore.postman.com/api/7616/test-remote-file-saver-with-rest-api)

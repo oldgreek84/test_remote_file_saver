@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 
 import dropbox
 from config import BASE_DIR
-# from utils import get_meta_data_attributes
 
 
 def get_meta_data_attributes(meta_data):
@@ -61,13 +60,10 @@ class DropboxSaver(BaseSaver):
         uploads file to remote dropbox server
         returns special link to file and file meta data
         '''
+
         path_to_file = f'/{filename}'
         try:
             meta_data = self._worker.files_upload(data, path_to_file)
-        # except dropbox.stone_validators.ValidationError:
-        #     raise WrongLinkValueError('wrong path to file pattern')
-        # except TypeError:
-        #     return None
         except Exception as e:
             raise e
         return get_meta_data_attributes(meta_data)
@@ -124,11 +120,3 @@ class LocalSaver(BaseSaver):
         with open(self.upload_dir + link, 'rb') as f:
             data = f.read()
         return data
-
-
-if __name__ == "__main__":
-    saver = LocalSaver()
-    test_data = open('/home/doc/1.pdf', 'rb').read()
-    from utils import set_uniq_name
-    test_filename = set_uniq_name('1.pdf')
-    TEST_LINK = '/1d95d2b2-d8ea-40ba-9604-83cc29a9ec67_1.pdf'
