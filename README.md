@@ -66,4 +66,4 @@ main_url = http://localhost:5000
 
 Documentation created with postman:
 
-[Link to documentation](https://explore.postman.com/api/7616/test-remote-file-saver-with-rest-api)
+[Link to documentation](https://documenter.getpostman.com/view/11911939/TVCgxSHn)
